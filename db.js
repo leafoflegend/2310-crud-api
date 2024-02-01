@@ -1,16 +1,27 @@
 import pg from 'pg';
+import chalk from 'chalk';
+
+const DATABASE_NAME = '2310_crud_api';
 
 const client = new pg.Pool({
-    user: 'eszwajkowski',
+    username: 'eszwajkowski',
+    port: 5432,
+    database: DATABASE_NAME,
     host: 'localhost',
-    database: '2310_crud_api',
-    port: '5432',
 });
 
-export const startDB = async () => {
-    const specificClient = await client.connect();
+const startDB = async () => {
+    let instance;
 
-    return specificClient;
+    try {
+        instance = await client.connect();
+        console.log(chalk.green(`Successfully connected to database: ${DATABASE_NAME}`));
+    } catch (e) {
+        console.error('Failure connecting to database.', e);
+        throw e;
+    }
+
+    return instance;
 };
 
-export default client;
+export { client, startDB };

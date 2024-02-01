@@ -1,32 +1,37 @@
-import client, { startDB } from './db.js';
+import { startDB, client } from './db.js';
+import chalk from 'chalk';
 
-const createTasks = async () => {
+const seed = async () => {
+    let i = null;
+
     try {
-        const createTableQuery = `
+        i = await startDB();
+
+        const query = `
             DROP TABLE IF EXISTS tasks;
 
             CREATE TABLE IF NOT EXISTS tasks (
-                uuid uuid PRIMARY KEY,
-                name VARCHAR(255),
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(255),
                 description TEXT,
                 complete BOOLEAN
             );
+
+            INSERT INTO tasks (title, description, complete) 
+            VALUES ('Demo', 'A demo of APIs powered by SQL.', false);
         `;
 
-        await client.query(createTableQuery);
-
-        console.log('Table tasks created successfully');
-    } catch (err) {
-        console.error('An error occurred', err);
+        await client.query(query);
+    } catch (e) {
+        console.error(`Failed to seed initial data in database.`, e);
+        throw e;
     }
-};
 
-const seed = async () => {
-    const c = await startDB();
-    await createTasks();
-    await c.release();
+    console.log(chalk.green('Successfully seeded database!'));
+
+    await i.release();
     await client.end();
     process.exit(0);
-}
+};
 
 seed();
